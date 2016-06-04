@@ -1,6 +1,7 @@
 package org.deeplearning4j.examples;
 
 import org.canova.api.util.ClassPathResource;
+import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer;
 import org.deeplearning4j.models.word2vec.Word2Vec;
 import org.deeplearning4j.text.sentenceiterator.LineSentenceIterator;
 import org.deeplearning4j.text.sentenceiterator.SentenceIterator;
@@ -12,24 +13,25 @@ import org.deeplearning4j.text.tokenization.tokenizerfactory.TokenizerFactory;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Collection;
 
 /**
  * Created by Shakti on 5/31/2016.
  */
 public class MyExample {
-    public static void main(String args[]) throws FileNotFoundException {
+    public static void main(String args[]) throws IOException {
         System.out.println("Load data....");
-        ClassPathResource resource = new ClassPathResource("raw_sentences.txt");
-        SentenceIterator iter = new LineSentenceIterator(resource.getFile());
-        iter.setPreProcessor(new SentencePreProcessor() {
+        //ClassPathResource resource = new ClassPathResource("raw_sentences.txt");
+        //SentenceIterator iter = new LineSentenceIterator(resource.getFile());
+        /*iter.setPreProcessor(new SentencePreProcessor() {
             @Override
             public String preProcess(String sentence) {
                 return sentence.toLowerCase();
             }
-        });
+        });*/
 
-        ClassPathResource resource2 = new ClassPathResource("myarticle.txt");
+        ClassPathResource resource2 = new ClassPathResource("all.txt");
         SentenceIterator iter2 = new LineSentenceIterator(resource2.getFile());
         iter2.setPreProcessor(new SentencePreProcessor() {
             @Override
@@ -67,11 +69,12 @@ public class MyExample {
             .learningRate(0.025) //
             .minLearningRate(1e-3) // learning rate decays wrt # words. floor learning
             .negativeSample(10) // sample size 10 words
-            .iterate(iter) //
+            .iterate(iter2) //
             .tokenizerFactory(tokenizer)
             .build();
         vec.fit();
-
+        System.out.println("Saving Vector");
+        WordVectorSerializer.writeWordVectors(vec, "finance.txt");
         System.out.println("Evaluate model....");
         double sim = vec.similarity("people", "money");
         System.out.println("Similarity between people and money: " + sim);
